@@ -6,7 +6,7 @@
 
 ![插件管理页](docs/screenshots/plugin-page.png)
 
-> 非官方第三方插件，与 DeepSeek 官方无关。当前版本 **v0.9.0**。
+> 非官方第三方插件，与 DeepSeek 官方无关。当前版本 **v0.9.1**。
 
 ---
 
@@ -68,7 +68,7 @@
 
 | 项目 | 说明 |
 | --- | --- |
-| DSH Desktop | 在 **0.2.1-rc.5**（Windows 桌面端）上开发与验证 |
+| DSH Desktop | 在 **0.2.2-rc.1** 上验证；同时兼容 0.2.1-rc.5 的页面结构（v0.9.1 起自适应两种 DOM） |
 | 运行环境 | DSH Web 客户端（`platform: web`），无第三方运行时依赖 |
 | 浏览器 | Chromium / Edge 内核（随 DSH 桌面端） |
 | 平台 | 主要验证 Windows；依赖 DSH 私有插件 API 与 DOM 结构，其它版本可能失效 |

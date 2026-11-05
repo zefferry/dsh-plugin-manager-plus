@@ -1098,9 +1098,13 @@ window.__ModuleLoader__.load({
       if (explicit) return explicit
       const head = card.firstElementChild
       if (!head) return null
-      const slot = head.firstElementChild
-      if (!slot || slot.nodeType !== 1) return null
-      return slot
+      // DSH 0.2.2 flattens the card: the icon box itself is the card's first
+      // child and holds the native <img> directly (0.2.1 had an extra wrapper,
+      // so the box was head.firstElementChild). Return the element that owns
+      // the <img>, never the <img> itself.
+      const first = head.firstElementChild
+      if (!first || first.tagName === 'IMG') return head
+      return first
     }
 
     function paintIcon(card, key, override) {
@@ -1529,15 +1533,40 @@ window.__ModuleLoader__.load({
       return node && node.parentElement === panel ? node : null
     }
 
+    // DSH 0.2.2 wrapped the plugin page in a scrollable body:
+    //   section[data-plugin-panel] > div[data-plugin-body]
+    //       > div[data-plugin-bar] (page head) + div.installedPanel (groups)
+    // On 0.2.1 the groups container was a direct child of the panel. Inserting
+    // the bar as a panel child now puts it above the page title, inside the
+    // window-drag region, where it cannot be clicked (BUG-DSH22-1). Resolve the
+    // slot relative to the page bar when the body wrapper exists.
+    function nativeBarHost(panel) {
+      const body = panel.querySelector(':scope > [data-plugin-body]')
+      if (!body) return null
+      const pageBar = body.querySelector(':scope > [data-plugin-bar]') || body.firstElementChild
+      return { parent: body, anchor: pageBar ? pageBar.nextElementSibling : body.firstElementChild }
+    }
+
     function ensureBar(surface) {
       const root = surface.root
-      const existing = surface.kind === 'native' ? root.querySelector(':scope > [data-pmod-bar]') : root.querySelector('[data-pmod-bar]')
+      const existing = root.querySelector('[data-pmod-bar]')
       const container = surface.kind === 'native' ? listContainer(root) : surfaceList(surface)
       const hasMainList =
         surface.kind === 'native'
           ? !!root.querySelector(GROUP_SELECTOR) || !!root.querySelector('[data-plugin-loading]')
           : !!container
-      if (!hasMainList || !container) {
+      if (!hasMainList) {
+        if (existing && existing.parentNode) existing.parentNode.removeChild(existing)
+        return null
+      }
+      let host = null
+      if (surface.kind === 'native') {
+        host = nativeBarHost(root)
+        if (!host && container) host = { parent: container.parentElement || root, anchor: container }
+      } else if (container) {
+        host = { parent: container.parentElement || root, anchor: container }
+      }
+      if (!host) {
         if (existing && existing.parentNode) existing.parentNode.removeChild(existing)
         return null
       }
@@ -1545,12 +1574,15 @@ window.__ModuleLoader__.load({
       const caps = [...surface.caps].join(' ')
       if (bar.getAttribute('data-pmod-bar-caps') !== caps) bar.setAttribute('data-pmod-bar-caps', caps)
       if (bar.getAttribute('data-pmod-bar-surface') !== surface.kind) bar.setAttribute('data-pmod-bar-surface', surface.kind)
-      // On the native page the bar must stay a direct child of the panel,
-      // immediately before the list container (native CSS keys off direct
-      // children); on a declared surface it sits right before the list.
-      const parent = surface.kind === 'native' ? root : container.parentElement || root
-      if (bar.parentElement !== parent || bar.nextElementSibling !== container) {
-        parent.insertBefore(bar, container)
+      // Keep the bar below the page head and above the card list. The anchor is
+      // the element right after the page bar, so a React re-render that replaces
+      // the body moves the bar along with it instead of orphaning it.
+      // BUG-DSH22-2: once the bar sits right after the page bar, the computed
+      // anchor is the bar itself; moving it before itself on every applyAll is a
+      // remove+insert in Chromium, which loops the mutation observer and drops
+      // focus (the tag input closed immediately). Skip the self-move.
+      if (bar.parentElement !== host.parent || (bar.nextElementSibling !== host.anchor && host.anchor !== bar)) {
+        host.parent.insertBefore(bar, host.anchor || null)
       }
       renderBar(bar)
       return bar
@@ -4524,15 +4556,17 @@ window.__ModuleLoader__.load({
           card.setAttribute('data-pmod-draggable', '1')
           card.setAttribute('draggable', 'true')
           if (!card.querySelector('[data-pmod-drag]')) {
-            const head = card.firstElementChild
-            if (head) {
-              const handle = document.createElement('span')
-              handle.className = 'pmod-drag'
-              handle.setAttribute('data-pmod-drag', '')
-              handle.setAttribute('aria-hidden', 'true')
-              handle.textContent = '\u28ff'
-              head.appendChild(handle)
-            }
+            // The handle is decorative (pointer-events: none). Put it next to
+            // the title so it stays inside the card row on both the 0.2.1
+            // wrapper layout and the 0.2.2 flat card layout.
+            const title = titleEl(card)
+            const handleHost = (title && title.parentElement) || card.firstElementChild || card
+            const handle = document.createElement('span')
+            handle.className = 'pmod-drag'
+            handle.setAttribute('data-pmod-drag', '')
+            handle.setAttribute('aria-hidden', 'true')
+            handle.textContent = '\u28ff'
+            handleHost.appendChild(handle)
           }
         } else if (!on && flagged) {
           card.removeAttribute('data-pmod-draggable')
