@@ -1,0 +1,9 @@
+# 运行/测试产物，不应提交
+node_modules/
+state.json
+state.json.bak-*
+ai-error.log
+*.log
+.DS_Store
+Thumbs.db
+desktop.ini

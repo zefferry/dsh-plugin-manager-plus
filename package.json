@@ -1,0 +1,48 @@
+{
+  "name": "@local/dsh-plugin-manager-plus",
+  "version": "0.9.0",
+  "private": true,
+  "license": "MIT",
+  "author": "zefferry",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zefferry/dsh-plugin-manager-plus.git"
+  },
+  "homepage": "https://github.com/zefferry/dsh-plugin-manager-plus#readme",
+  "bugs": {
+    "url": "https://github.com/zefferry/dsh-plugin-manager-plus/issues"
+  },
+  "type": "module",
+  "description": "Plugin manager enhancements: install-without-enable, tag filtering, search, ordering, per-plugin name/description/icon overrides, derived 启用中/未启用 system tags, batch actions, uninstall, editable AI prompt with a model picker (direct DeepSeek API when a key is available, otherwise one-shot DSH native calls, no tool definitions, at most 3 rounds), and Surface v1 support so the same UI works on the instance-manager plugin page.",
+  "main": "./host/index.js",
+  "icon": "./assets/icon.svg",
+  "exports": {
+    ".": "./host/index.js",
+    "./client": "./client.js",
+    "./icon": "./assets/icon.svg",
+    "./locale/*": "./locale/*",
+    "./package.json": "./package.json"
+  },
+  "files": [
+    "host/index.js",
+    "client.js",
+    "assets/icon.svg",
+    "locale/en.json",
+    "locale/zh.json",
+    "cordis.patch.yml",
+    "README.md"
+  ],
+  "dsh": {
+    "bundle": {
+      "patch": "./cordis.patch.yml"
+    },
+    "client": {
+      "platform": "web",
+      "immediately": true,
+      "inject": [
+        "@deepseek-ai/dsh-client-ui-primitives",
+        "@deepseek-ai/dsh-client-locale"
+      ]
+    }
+  }
+}

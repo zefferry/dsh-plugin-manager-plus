@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" width="64" height="64" role="img" aria-label="Plugin Manager Plus">
+  <defs>
+    <linearGradient id="pmp-accent" x1="8" y1="6" x2="56" y2="58" gradientUnits="userSpaceOnUse">
+      <stop offset="0" stop-color="#4c8dff"/>
+      <stop offset="1" stop-color="#7b5cff"/>
+    </linearGradient>
+  </defs>
+  <rect x="4" y="4" width="56" height="56" rx="14" fill="url(#pmp-accent)" opacity="0.16"/>
+  <rect x="4.75" y="4.75" width="54.5" height="54.5" rx="13.25" fill="none" stroke="url(#pmp-accent)" stroke-width="1.5" opacity="0.7"/>
+  <g fill="none" stroke="url(#pmp-accent)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round">
+    <path d="M18 20h28"/>
+    <path d="M23 20v5.5a4 4 0 0 0 1.2 2.9l5.8 5.8V44h8v-9.8l5.8-5.8A4 4 0 0 0 45 25.5V20"/>
+  </g>
+  <circle cx="32" cy="50" r="3.2" fill="url(#pmp-accent)"/>
+</svg>

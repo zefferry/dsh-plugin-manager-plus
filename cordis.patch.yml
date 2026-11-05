@@ -1,0 +1,3 @@
+- insert:
+    - id: plugin-manager-plus
+      name: "@local/dsh-plugin-manager-plus"
